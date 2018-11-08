@@ -43,7 +43,7 @@
 # Your task is to complete the procedures according to the specifications below
 # as well as to implement a Make-Your-Own procedure (MYOP). You are encouraged 
 # to define any additional helper procedures that can assist you in accomplishing 
-# a task. You are encouraged to test your code by using print statements and the 
+# a task. You are encouraged to test your code by using print(statements and the 
 # Test Run button. 
 # ----------------------------------------------------------------------------- 
 
@@ -251,7 +251,20 @@ def add_new_user(network, user, games):
 #   himself/herself. It is also OK if the list contains a user's primary 
 #   connection that is a secondary connection as well.
 def get_secondary_connections(network, user):
-	return []
+    
+    if user not in network:
+    
+        return None
+    
+    else:
+    
+        sec_connections = []
+        
+        for connection in get_connections(network, user):
+            
+            sec_connections += get_connections(network, connection)
+        
+        return list(set(sec_connections))
 
 # ----------------------------------------------------------------------------- 	
 # count_common_connections(network, user_A, user_B): 
@@ -266,7 +279,22 @@ def get_secondary_connections(network, user):
 #   The number of connections in common (as an integer).
 #   - If user_A or user_B is not in network, return False.
 def count_common_connections(network, user_A, user_B):
-    return 0
+    
+    if user_A in network and user_B in network:
+        
+        common_con = 0
+        
+        for connection in network[user_A]['connections']:
+            
+            if connection in network[user_B]['connections']:
+                
+                common_con += 1
+        
+        return common_con
+        
+    else: 
+        
+        return False
 
 # ----------------------------------------------------------------------------- 
 # find_path_to_friend(network, user_A, user_B): 
@@ -284,7 +312,7 @@ def count_common_connections(network, user_A, user_B):
 #   - If user_A or user_B is not in network, return None.
 #
 # Sample output:
-#   >>> print find_path_to_friend(network, "Abe", "Zed")
+#   >>> print(find_path_to_friend(network, "Abe", "Zed")
 #   >>> ['Abe', 'Gel', 'Sam', 'Zed']
 #   This implies that Abe is connected with Gel, who is connected with Sam, 
 #   who is connected with Zed.
@@ -300,9 +328,37 @@ def count_common_connections(network, user_A, user_B):
 #   in this procedure to keep track of nodes already visited in your search. You 
 #   may safely add default parameters since all calls used in the grading script 
 #   will only include the arguments network, user_A, and user_B.
-def find_path_to_friend(network, user_A, user_B):
-	# your RECURSIVE solution here!
-	return None
+def find_path_to_friend(network, user_A, user_B, checked=None):
+	
+    if user_A in network and user_B in network:
+
+        checked = checked or []
+        path = [user_A]
+        
+        checked.append(user_A)
+        connections = get_connections(network, user_A)
+        
+        if user_B in connections:
+            
+            return path + [user_B]
+            
+        else:
+            
+            for connection in connections:
+                
+                if connection not in checked:
+                    
+                    newpath = find_path_to_friend(network, connection, user_B, checked)
+                    
+                    if newpath:
+                        
+                        return path + newpath
+        return None
+        
+        
+    else: 
+        
+        return None
 
 # Make-Your-Own-Procedure (MYOP)
 # ----------------------------------------------------------------------------- 
@@ -311,24 +367,59 @@ def find_path_to_friend(network, user_A, user_B):
 # your network (like path_to_friend). Don't forget to comment your MYOP. You 
 # may give this procedure any name you want.
 
-# Replace this with your own procedure! You can also uncomment the lines below
-# to see how your code behaves. Have fun!
+# ----------------------------------------------------------------------------- 
+# who_plays_it(network, game): 
+#   Returns a list of all the users who plays a given game
+#
+# Arguments: 
+#   network: the gamer network data structure
+#   game:    a string containing the name of the game
+# 
+# Return: 
+#   A list of all users who plays the game.
+#   - If no user plays the game, return None.
+
+def who_plays_it(network, game):
+    
+    users = []
+    
+    for user in network:
+        
+        if game in network[user]['games']:
+            
+            users.append(user)
+            
+    if users:
+        
+        return users
+        
+    else:
+        
+        return None
+    
+# Testing Area
 
 net = create_data_structure(example_input)
-print "--- Network ---\n"
-print net
-print "\n--- Get Connections | Debra ---\n"
-print get_connections(net, "Debra")
-print "\n--- Get Connections | Mercedes ---\n"
-print get_connections(net, "Mercedes")
-print "\n--- Get Games Liked | John ---\n"
-print get_games_liked(net, "John")
-print "\n--- Adds Freda to John's connections ---\n"
-print add_connection(net, "John", "Freda")
-print "\n--- Adds new User | Debra ---\n"
-print add_new_user(net, "Debra", [])
-print "\n--- Adds new User | Nick ---\n"
-print add_new_user(net, "Nick", ["Seven Schemers", "The Movie: The Game"]) # True
-#print get_secondary_connections(net, "Mercedes")
-#print count_common_connections(net, "Mercedes", "John")
-#print find_path_to_friend(net, "John", "Ollie")
+print("--- Network ---\n")
+print(net)
+print("\n--- Get Connections | Debra ---\n")
+print(get_connections(net, "Debra"))
+print("\n--- Get Connections | Mercedes ---\n")
+print(get_connections(net, "Mercedes"))
+print("\n--- Get Games Liked | John ---\n")
+print(get_games_liked(net, "John"))
+print("\n--- Adds Freda to John's connections ---\n")
+print(add_connection(net, "John", "Freda"))
+print("\n--- Adds new User | Debra ---\n")
+print(add_new_user(net, "Debra", []))
+print("\n--- Adds new User | Nick ---\n")
+print(add_new_user(net, "Nick", ["Seven Schemers", "The Movie: The Game"])) # True
+print("\n--- Get Secondary Connections | Mercedes ---\n")
+print(get_secondary_connections(net, "Mercedes"))
+print("\n--- Count Common Connections | Mercedes and John ---\n")
+print(count_common_connections(net, "Mercedes", "John"))
+print("\n--- Find Path to Friend | John and Ollie ---\n")
+print(find_path_to_friend(net, "John", "Ollie"))
+print("\n--- Who Plays It? (MYOP) | The Legend of Corgi ---\n")
+print(who_plays_it(net, 'The Legend of Corgi'))
+print(who_plays_it(net, 'The Legends of Zelda'))
